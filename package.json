@@ -1,0 +1,26 @@
+{
+  "name": "prescripto",
+  "version": "1.0.0",
+  "description": "Full stack appointment booking system for doctors and hospitals",
+  "scripts": {
+    "install:all": "npm install --prefix backend && npm install --prefix clientside && npm install --prefix admin",
+    "dev:backend": "npm run server --prefix backend",
+    "dev:client": "npm run dev --prefix clientside",
+    "dev:admin": "npm run dev --prefix admin",
+    "start:backend": "npm start --prefix backend",
+    "start:client": "npm run dev --prefix clientside",
+    "start:admin": "npm run dev --prefix admin"
+  },
+  "keywords": [
+    "appointment",
+    "booking",
+    "doctor",
+    "hospital",
+    "react",
+    "nodejs",
+    "mongodb"
+  ],
+  "author": "NIYIBIZI Elysée",
+  "license": "MIT"
+}
+

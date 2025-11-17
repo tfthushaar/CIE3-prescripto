@@ -5,6 +5,7 @@ import doctorModel from "../models/doctorModel.js";
 import jwt from "jsonwebtoken";
 import appointmentModel from "../models/appointmentModel.js";
 import userModel from "../models/userModel.js";
+import fs from "fs";
 
 // API for adding doctor
 const addDoctor = async (req, res) => {
@@ -37,11 +38,25 @@ const addDoctor = async (req, res) => {
       return res.json({ success: false, message: "Missing Details" });
     }
 
+    // Check if image file is provided
+    if (!imageFile) {
+      return res.json({ success: false, message: "Doctor image is required" });
+    }
+
     // validating email format
     if (!validator.isEmail(email)) {
       return res.json({
         success: false,
         message: "Please enter a valid email",
+      });
+    }
+
+    // Check if doctor with this email already exists
+    const existingDoctor = await doctorModel.findOne({ email });
+    if (existingDoctor) {
+      return res.json({
+        success: false,
+        message: "Doctor with this email already exists",
       });
     }
 
@@ -58,10 +73,28 @@ const addDoctor = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, salt);
 
     // upload image to cloudinary
-    const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
-      resource_type: "image",
-    });
-    const imageUrl = imageUpload.secure_url;
+    let imageUrl;
+    try {
+      const imageUpload = await cloudinary.uploader.upload(imageFile.path, {
+        resource_type: "image",
+      });
+      imageUrl = imageUpload.secure_url;
+      
+      // Clean up uploaded file after Cloudinary upload
+      if (fs.existsSync(imageFile.path)) {
+        fs.unlinkSync(imageFile.path);
+      }
+    } catch (uploadError) {
+      console.log("Cloudinary upload error:", uploadError);
+      // Clean up file even if upload fails
+      if (fs.existsSync(imageFile.path)) {
+        fs.unlinkSync(imageFile.path);
+      }
+      return res.json({ 
+        success: false, 
+        message: "Failed to upload image. Please check Cloudinary configuration." 
+      });
+    }
 
     const doctorData = {
       name,

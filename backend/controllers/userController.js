@@ -38,7 +38,7 @@ const registerUser = async (req, res) => {
     const newUser = new userModel(userData);
     const user = await newUser.save();
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET);
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
 
     res.json({ success: true, token });
   } catch (error) {
@@ -176,11 +176,23 @@ const bookAppointment = async (req, res) => {
 const listAppointment = async (req, res) => {
   try {
     const { userId } = req.body;
-    const appointments = await appointmentModel.find({ userId });
+    
+    if (!userId) {
+      return res.json({ 
+        success: false, 
+        message: "User ID not found. Please login again." 
+      });
+    }
+
+    const appointments = await appointmentModel.find({ userId }).sort({ date: -1 });
+
+    if (!appointments || appointments.length === 0) {
+      return res.json({ success: true, appointments: [] });
+    }
 
     res.json({ success: true, appointments });
   } catch (error) {
-    console.log(error);
+    console.log("Error fetching appointments:", error);
     res.json({ success: false, message: error.message });
   }
 };

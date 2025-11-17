@@ -39,10 +39,13 @@ const MyAppointments = () => {
       if (data.success) {
         setAppointments(data.appointments.reverse());
         console.log(data.appointments);
+      } else {
+        toast.error(data.message || "Failed to load appointments");
       }
     } catch (error) {
       console.log(error);
-      toast.error(error.message);
+      const errorMessage = error.response?.data?.message || error.message || "Failed to load appointments";
+      toast.error(errorMessage);
     }
   };
 
@@ -78,7 +81,13 @@ const MyAppointments = () => {
         My appointments
       </p>
       <div>
-        {appointments.map((item, index) => (
+        {appointments.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            <p className="text-lg">No appointments found</p>
+            <p className="text-sm mt-2">Book an appointment to see it here</p>
+          </div>
+        ) : (
+          appointments.map((item, index) => (
           <div
             className="grid grid-cols-[1fr_2fr] gap-4 sm:flex sm:gap-6 py-2 border-b"
             key={index}
@@ -132,7 +141,8 @@ const MyAppointments = () => {
               )}
             </div>
           </div>
-        ))}
+        ))
+        )}
       </div>
     </div>
   );

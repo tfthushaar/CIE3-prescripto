@@ -11,7 +11,14 @@ const authUser = async (req, res, next) => {
       });
     }
     const token_decode = jwt.verify(token, process.env.JWT_SECRET);
-    req.body.userId = token_decode.id;
+    // Handle both 'id' and '_id' for backward compatibility
+    req.body.userId = token_decode.id || token_decode._id;
+    if (!req.body.userId) {
+      return res.json({
+        success: false,
+        message: "Invalid token format",
+      });
+    }
     next();
   } catch (error) {
     console.log(error);
